@@ -78,7 +78,8 @@ public class OidcJwtTokenValve extends AbstractJwtTokenValve {
     @Override
     protected void handleAuthentication(Request request, Response response) throws IOException, ServletException {
         try {
-            Optional<DecodedJWT> optionalJwt = getJwtFrom(request);
+            String authorizationHeader = request.getHeader("Authorization");
+            Optional<DecodedJWT> optionalJwt = getJwtFrom(authorizationHeader);
             if (optionalJwt.isPresent()) {
                 JwtAdapter jwtAdapter = verify(optionalJwt.get());
                 authenticateRequest(request, jwtAdapter);
@@ -95,7 +96,7 @@ public class OidcJwtTokenValve extends AbstractJwtTokenValve {
         }
     }
 
-    private JwtAdapter verify(DecodedJWT decodedJWT) throws JwkException {
+    protected JwtAdapter verify(DecodedJWT decodedJWT) throws JwkException {
         Jwk jwk = urlJwkProvider.get(decodedJWT.getKeyId());
         JwtAdapter verified = JwtTokenVerifier.create(newRsaKeyProvider(jwk), customUserIdClaim, customRolesClaim)
                 .verify(decodedJWT);
@@ -132,8 +133,7 @@ public class OidcJwtTokenValve extends AbstractJwtTokenValve {
         };
     }
 
-    private Optional<DecodedJWT> getJwtFrom(Request request) {
-        String bearerToken = request.getHeader("Authorization");
+    protected Optional<DecodedJWT> getJwtFrom(String bearerToken) {
         if (bearerToken != null && bearerToken.toLowerCase().startsWith("bearer ")) {
             String jwt = bearerToken.replaceAll("(?i)Bearer (.*)", "$1");
             if (!jwt.isEmpty()) {
