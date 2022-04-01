@@ -195,16 +195,6 @@ public class OidcJwtTokenWithFallbackValveTest {
     }
 
     @Test
-    public void shouldFailAuthBecauseOfAuthorizationHeaderNotSet() throws Exception {
-        mockSecurityConstraints();
-
-        jwtValve.invoke(request, response);
-
-        verify(request).getHeader("Authorization");
-        verify(response).sendError(401, "Authorization token not provided");
-    }
-
-    @Test
     public void shouldFailAuthBecauseOfBearerValueNotSet() throws Exception {
         mockSecurityConstraints();
         when(request.getHeader("Authorization")).thenReturn(

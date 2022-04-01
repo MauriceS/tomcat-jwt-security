@@ -38,6 +38,8 @@ public class OidcJwtTokenWithFallbackValve extends OidcJwtTokenValve {
             } else {
                 if (hasBasicAuth(authorizationHeader)) {
                   this.getNext().invoke(request, response);
+                } else if (authorizationHeader == null){
+                  this.getNext().invoke(request, response);
                 } else {
                   sendUnauthorizedError(request, response, "Authorization token not provided");
                 }
